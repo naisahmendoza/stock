@@ -304,36 +304,6 @@ docker-compose ps
 docker stats
 ```
 
----
-
-## Production Considerations
-
-### Security
-- [ ] Change default H2 database credentials
-- [ ] Use environment variables for secrets
-- [ ] Enable HTTPS/TLS
-- [ ] Add authentication/authorization
-
-### Performance
-- [ ] Replace H2 with PostgreSQL/MySQL
-- [ ] Add Redis for caching
-- [ ] Configure connection pools
-- [ ] Enable query optimization
-
-### Monitoring & Logging
-- [ ] Add centralized logging (ELK stack)
-- [ ] Add metrics collection (Prometheus)
-- [ ] Add distributed tracing (Jaeger)
-- [ ] Set up alerts
-
-### Scaling
-- [ ] Use Kubernetes instead of Docker Compose
-- [ ] Add load balancers
-- [ ] Enable auto-scaling
-- [ ] Use managed databases
-
----
-
 ## Additional Commands
 
 ### Rebuild Specific Service
