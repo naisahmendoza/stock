@@ -1,0 +1,2 @@
+INSERT INTO products (id, sku, name, stock_quantity) VALUES (RANDOM_UUID(),'ABC123', 'Product A', 8);
+INSERT INTO products (id, sku, name, stock_quantity) VALUES (RANDOM_UUID(),'LMN789', 'Product C', 0);

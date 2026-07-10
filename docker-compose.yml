@@ -1,0 +1,92 @@
+name: stock
+
+services:
+  # Vendor A Service - Product API (Port 9000)
+  vendor-a-service:
+    build:
+      context: .
+      dockerfile: vendor-a-service/Dockerfile
+      labels:
+        - "com.docker.compose.image.name=vendor-a-service"
+    image: vendor-a-service:latest
+    container_name: vendor-a-service
+    ports:
+      - "9001:9000"
+    environment:
+      - SPRING_APPLICATION_NAME=vendor-a-service
+      - SERVER_PORT=9000
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - LOGGING_LEVEL_COM_NAISA_VENDOR_A_SERVICE=INFO
+    volumes:
+      - vendor-a-data:/data
+    networks:
+      - stock-network
+
+  # Stock Service - Main API (Port 4001)
+  stock-service:
+    build:
+      context: .
+      dockerfile: stock-service/Dockerfile
+      labels:
+        - "com.docker.compose.image.name=stock-sync-service"
+    image: stock-sync-service:latest
+    container_name: stock-sync-service
+    ports:
+      - "4001:4001"
+    environment:
+      - SPRING_APPLICATION_NAME=stock-sync-service
+      - SERVER_PORT=4001
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/stockdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - API_VENDOR_A_SERVICE_BASE_URL=http://vendor-a-service:9000
+      - API_VENDOR_A_SERVICE_GET_PRODUCTS_URI=/vendor-a/products
+      - LOGGING_LEVEL_COM_NAISA_STOCK_SERVICE=INFO
+    volumes:
+      - stock-data:/data
+    depends_on:
+      - vendor-a-service
+    networks:
+      - stock-network
+
+  # Stock Sync Scheduler - Scheduled Tasks
+  stock-sync-scheduler:
+    build:
+      context: .
+      dockerfile: stock-sync-scheduler/Dockerfile
+      labels:
+        - "com.docker.compose.image.name=stock-sync-scheduler"
+    image: stock-sync-scheduler:latest
+    container_name: stock-sync-scheduler
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_APPLICATION_NAME=stock-sync-scheduler
+      - SPRING_PROFILES_ACTIVE=docker
+      - API_STOCK_SYNC_SERVICE_BASE_URL=http://stock-sync-service:4001
+      - API_STOCK_SYNC_SERVICE_SYNC_PRODUCTS_URI=/api/products/sync
+      - API_STOCK_SYNC_SERVICE_RETRY_MAX_COUNT=3
+      - API_STOCK_SYNC_SERVICE_RETRY_DELAY_MILLIS=1000
+      - STOCK_SYNC_VENDORA_CRON=0 0/10 * * * *
+      - STOCK_SYNC_VENDORA_TIMEZONE=UTC
+      - STOCK_SYNC_VENDORB_CRON=0 5/10 * * * *
+      - STOCK_SYNC_VENDORB_TIMEZONE=UTC
+      - LOGGING_LEVEL_COM_NAISA_STOCK_SYNC_SCHEDULER=INFO
+    depends_on:
+      - stock-service
+    networks:
+      - stock-network
+
+volumes:
+  vendor-a-data:
+    driver: local
+  stock-data:
+    driver: local
+
+networks:
+  stock-network:
+    driver: bridge
