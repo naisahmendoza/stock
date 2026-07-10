@@ -35,8 +35,7 @@ It exposes a /GET endpoint to fetch all product in the Vendor A's DB. I have pre
 - It has a Dockerfile
 
 ### Docker-compose enabled
-Just run a docker-compose up -d to start all 3 services. All of these are tested and working as expected for both CSV and API sync.
-
+Just run a docker-compose up -d to start all 3 services. All of these are tested and working as expected for both CSV and API sync. For more info see [DOCKER_SETUP.md](DOCKER_SETUP.md)
 ### Future Improvements Suggestions
 #### Phase 1: Persistence and Security Layer
 - [ ] Replace H2 with a relational database like PostgreSQL, Oracle, or MySQL
